@@ -20,7 +20,7 @@ inputs:
   context:
     description: "Docker build context"
     required: false
-    default: ../
+    default: .
 
 runs:
   using: "composite"
