@@ -1,3 +1,3 @@
 # Actions
 
-Repo to store GitHub Actions Templates
+Repo to store resuable GitHub Actions

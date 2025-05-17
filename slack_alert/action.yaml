@@ -1,0 +1,27 @@
+name: "Slack Notification"
+description: "Send Slack Notifications"
+inputs:
+  message:
+    description: "Slack message to send"
+    required: true
+  title:
+    description: "Slack message title"
+    required: true
+  color:
+    description: "Slack color (good, danger, etc)"
+    required: false
+    default: "good"
+  webhook_url:
+    description: "Slack Webhook URL"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Send Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ inputs.color }}
+        SLACK_MESSAGE: ${{ inputs.message }}
+        SLACK_TITLE: ${{ inputs.title }}
+        SLACK_USERNAME: GitHub Actions
+        SLACK_WEBHOOK: ${{ inputs.webhook_url }}
