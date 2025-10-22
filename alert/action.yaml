@@ -1,0 +1,45 @@
+name: "Slack Notification"
+description: "Send Slack Notifications with automatic context"
+inputs:
+  status:
+    description: "Workflow status (success, failure, cancelled)"
+    required: true
+  webhook_url:
+    description: "Slack Webhook URL"
+    required: true
+  custom_message:
+    description: "Optional custom message to append"
+    required: false
+    default: ""
+  mention_on_failure:
+    description: "Slack user/channel to mention on failure (e.g., '@channel' or '<@USER_ID>')"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set notification details
+      shell: bash
+      id: details
+      run: |
+        bash ${{ github.action_path }}/../scripts/build-slack-message.sh \
+          "${{ inputs.status }}" \
+          "${{ inputs.webhook_url }}" \
+          "${{ inputs.custom_message }}" \
+          "${{ inputs.mention_on_failure }}" \
+          "${{ github.repository }}" \
+          "${{ github.workflow }}" \
+          "${{ github.ref_name }}" \
+          "${{ github.actor }}" \
+          "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+    - name: Send Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ steps.details.outputs.color }}
+        SLACK_MESSAGE: ${{ steps.details.outputs.message }}
+        SLACK_TITLE: ${{ steps.details.outputs.title }}
+        SLACK_USERNAME: GitHub Actions
+        SLACK_WEBHOOK: ${{ inputs.webhook_url }}
+        SLACK_FOOTER: "GitHub Actions"

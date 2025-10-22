@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run tests
+        run: make test
+
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Deploy
+        run: make deploy
+
+  notify:
+    needs: [test, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Alert
+        uses: jyablonski/actions/alert@v1
+        with:
+          status: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
