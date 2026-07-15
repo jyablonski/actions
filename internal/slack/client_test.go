@@ -27,12 +27,12 @@ func TestClientSend(t *testing.T) {
 		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
 			t.Fatalf("decode payload: %v", err)
 		}
-		if len(payload.Attachments) != 1 || payload.Attachments[0].Color != "good" {
+		if len(payload.Attachments) != 1 || payload.Attachments[0].Color != templates.SuccessColor {
 			t.Fatalf("attachments = %#v", payload.Attachments)
 		}
 		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("ok"))}, nil
 	}))
-	if err := client.Send(context.Background(), templates.Message{Text: "hello", Attachments: []templates.Attachment{{Color: "good", Blocks: []templates.Block{{Type: "section"}}}}}); err != nil {
+	if err := client.Send(context.Background(), templates.Message{Text: "hello", Attachments: []templates.Attachment{{Color: templates.SuccessColor, Blocks: []templates.Block{{Type: "section"}}}}}); err != nil {
 		t.Fatalf("Send() error = %v", err)
 	}
 }

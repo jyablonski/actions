@@ -68,10 +68,19 @@ func TestRenderPipelineFailureIncludesFailedJobs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if len(message.Attachments) != 1 || message.Attachments[0].Color != "danger" {
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != FailureColor {
 		t.Fatalf("attachments = %#v", message.Attachments)
 	}
+	if got := message.Text; got != "" {
+		t.Fatalf("message text = %q", got)
+	}
+	if got := message.Attachments[0].Fallback; got != "Deployment failed: jyablonski/actions" {
+		t.Fatalf("attachment fallback = %q", got)
+	}
 	blocks := message.Attachments[0].Blocks
+	if got := blocks[0].Text.Text; got != "🚨 Deployment failed" {
+		t.Fatalf("header block = %q", got)
+	}
 	if !strings.Contains(blocks[2].Fields[3].Text, "test, deploy") {
 		t.Fatalf("failed jobs field = %q", blocks[2].Fields[3].Text)
 	}
@@ -113,10 +122,19 @@ func TestRenderDeploymentSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if len(message.Attachments) != 1 || message.Attachments[0].Color != "good" {
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != SuccessColor {
 		t.Fatalf("attachments = %#v", message.Attachments)
 	}
+	if got := message.Text; got != "" {
+		t.Fatalf("message text = %q", got)
+	}
+	if got := message.Attachments[0].Fallback; got != "Deployment succeeded: jyablonski/actions" {
+		t.Fatalf("attachment fallback = %q", got)
+	}
 	blocks := message.Attachments[0].Blocks
+	if got := blocks[0].Text.Text; got != "🚀 Deployment succeeded" {
+		t.Fatalf("header block = %q", got)
+	}
 	if got := blocks[2].Fields[0].Text; !strings.Contains(got, "abcdef1") {
 		t.Fatalf("version field = %q", got)
 	}

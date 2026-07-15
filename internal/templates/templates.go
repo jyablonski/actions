@@ -12,6 +12,8 @@ const (
 	PROpened          = "pr-opened"
 	PipelineFailure   = "pipeline-failure"
 	DeploymentSuccess = "deployment-success"
+	FailureColor      = "#E01E5A"
+	SuccessColor      = "#2EB67D"
 )
 
 type Text struct {
@@ -26,12 +28,13 @@ type Block struct {
 }
 
 type Attachment struct {
-	Color  string  `json:"color"`
-	Blocks []Block `json:"blocks"`
+	Color    string  `json:"color"`
+	Fallback string  `json:"fallback,omitempty"`
+	Blocks   []Block `json:"blocks"`
 }
 
 type Message struct {
-	Text        string       `json:"text"`
+	Text        string       `json:"text,omitempty"`
 	Blocks      []Block      `json:"blocks,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
 }
@@ -93,9 +96,9 @@ func renderPROpened(ctx githubctx.Context, params Params) (Message, error) {
 func renderPipelineFailure(ctx githubctx.Context, params Params) Message {
 	failedJobs := first(params.FailedJobs, "See workflow run")
 	message := Message{
-		Text: fmt.Sprintf("Main pipeline failed: %s", ctx.Repository),
+		Text: fmt.Sprintf("Deployment failed: %s", ctx.Repository),
 		Blocks: []Block{
-			header("🚨 Main pipeline failed"),
+			header("🚨 Deployment failed"),
 			section(fmt.Sprintf("*%s* · %s", escape(ctx.Repository), escape(ctx.Workflow))),
 			fields(
 				field("Commit", shortSHA(ctx.SHA)),
@@ -108,7 +111,7 @@ func renderPipelineFailure(ctx githubctx.Context, params Params) Message {
 	if params.Summary != "" {
 		message.Blocks = append(message.Blocks, section(escape(params.Summary)))
 	}
-	return withColor(withRunLink(message, ctx, params.Mention), "danger")
+	return withColor(withRunLink(message, ctx, params.Mention), FailureColor)
 }
 
 func renderDeploymentSuccess(ctx githubctx.Context, params Params) Message {
@@ -127,7 +130,7 @@ func renderDeploymentSuccess(ctx githubctx.Context, params Params) Message {
 	if params.DeploymentURL != "" {
 		message.Blocks = append(message.Blocks, section(fmt.Sprintf("<%s|View deployment>", params.DeploymentURL)))
 	}
-	return withColor(withRunLink(message, ctx, params.Mention), "good")
+	return withColor(withRunLink(message, ctx, params.Mention), SuccessColor)
 }
 
 func withRunLink(message Message, ctx githubctx.Context, mention string) Message {
@@ -141,7 +144,8 @@ func withRunLink(message Message, ctx githubctx.Context, mention string) Message
 }
 
 func withColor(message Message, color string) Message {
-	message.Attachments = []Attachment{{Color: color, Blocks: message.Blocks}}
+	message.Attachments = []Attachment{{Color: color, Fallback: message.Text, Blocks: message.Blocks}}
+	message.Text = ""
 	message.Blocks = nil
 	return message
 }

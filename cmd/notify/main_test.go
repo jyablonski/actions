@@ -49,8 +49,8 @@ func TestRunSelectsPipelineFailureTemplate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
-	if !strings.Contains(sender.message.Text, "Main pipeline failed") {
-		t.Fatalf("message text = %q", sender.message.Text)
+	if !strings.Contains(sender.message.Attachments[0].Fallback, "Deployment failed") {
+		t.Fatalf("attachment fallback = %q", sender.message.Attachments[0].Fallback)
 	}
 }
 
@@ -131,8 +131,8 @@ func TestRunWritesSuccess(t *testing.T) {
 	if got := output.String(); got != "Slack notification sent\n" {
 		t.Fatalf("output = %q", got)
 	}
-	if !strings.Contains(sender.message.Text, "Deployment succeeded") {
-		t.Fatalf("message text = %q", sender.message.Text)
+	if !strings.Contains(sender.message.Attachments[0].Fallback, "Deployment succeeded") {
+		t.Fatalf("attachment fallback = %q", sender.message.Attachments[0].Fallback)
 	}
 }
 
@@ -170,8 +170,8 @@ func TestRunDeliversMessageToLocalWebhook(t *testing.T) {
 		t.Fatalf("run() error = %v", err)
 	}
 	message := <-messages
-	if !strings.Contains(message.Text, "Main pipeline failed") {
-		t.Fatalf("message text = %q", message.Text)
+	if !strings.Contains(message.Attachments[0].Fallback, "Deployment failed") {
+		t.Fatalf("attachment fallback = %q", message.Attachments[0].Fallback)
 	}
 }
 
