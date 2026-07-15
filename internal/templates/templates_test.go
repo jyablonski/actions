@@ -68,8 +68,21 @@ func TestRenderPipelineFailureIncludesFailedJobs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if !strings.Contains(message.Blocks[2].Fields[3].Text, "test, deploy") {
-		t.Fatalf("failed jobs field = %q", message.Blocks[2].Fields[3].Text)
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != FailureColor {
+		t.Fatalf("attachments = %#v", message.Attachments)
+	}
+	if got := message.Text; got != "" {
+		t.Fatalf("message text = %q", got)
+	}
+	if got := message.Attachments[0].Fallback; got != "Deployment failed: jyablonski/actions" {
+		t.Fatalf("attachment fallback = %q", got)
+	}
+	blocks := message.Attachments[0].Blocks
+	if got := blocks[0].Text.Text; got != "🚨 Deployment failed" {
+		t.Fatalf("header block = %q", got)
+	}
+	if !strings.Contains(blocks[2].Fields[3].Text, "test, deploy") {
+		t.Fatalf("failed jobs field = %q", blocks[2].Fields[3].Text)
 	}
 }
 
@@ -84,13 +97,14 @@ func TestRenderPipelineFailureIncludesDefaultsAndSummary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if got := message.Blocks[2].Fields[3].Text; !strings.Contains(got, "See workflow run") {
+	blocks := message.Attachments[0].Blocks
+	if got := blocks[2].Fields[3].Text; !strings.Contains(got, "See workflow run") {
 		t.Fatalf("failed jobs field = %q", got)
 	}
-	if got := message.Blocks[3].Text.Text; got != "test &lt;failed&gt;" {
+	if got := blocks[3].Text.Text; got != "test &lt;failed&gt;" {
 		t.Fatalf("summary block = %q", got)
 	}
-	if got := message.Blocks[len(message.Blocks)-1].Text.Text; !strings.Contains(got, "View workflow run") {
+	if got := blocks[len(blocks)-1].Text.Text; !strings.Contains(got, "View workflow run") {
 		t.Fatalf("workflow link = %q", got)
 	}
 }
@@ -108,10 +122,23 @@ func TestRenderDeploymentSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if got := message.Blocks[2].Fields[0].Text; !strings.Contains(got, "abcdef1") {
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != SuccessColor {
+		t.Fatalf("attachments = %#v", message.Attachments)
+	}
+	if got := message.Text; got != "" {
+		t.Fatalf("message text = %q", got)
+	}
+	if got := message.Attachments[0].Fallback; got != "Deployment succeeded: jyablonski/actions" {
+		t.Fatalf("attachment fallback = %q", got)
+	}
+	blocks := message.Attachments[0].Blocks
+	if got := blocks[0].Text.Text; got != "🚀 Deployment succeeded" {
+		t.Fatalf("header block = %q", got)
+	}
+	if got := blocks[2].Fields[0].Text; !strings.Contains(got, "abcdef1") {
 		t.Fatalf("version field = %q", got)
 	}
-	if got := message.Blocks[3].Text.Text; got != "<https://example.com/deployments/42|View deployment>" {
+	if got := blocks[3].Text.Text; got != "<https://example.com/deployments/42|View deployment>" {
 		t.Fatalf("deployment link = %q", got)
 	}
 }
