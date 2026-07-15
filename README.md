@@ -21,7 +21,7 @@ For example, use the pull request notification action in a pull request workflow
 
 Set `slack-mention` to an individual user ID such as `<@U01234567>` or a user-group ID such as `<!subteam^S01234567>`.
 
-The action template is versioned by the moving `v1` major tag, while its internal `docker://` image reference is pinned to an immutable digest. After the first image release, replace the `<PLACEHOLDER_DIGEST>` values in the Go-backed action metadata with the digest emitted by the release workflow.
+The action template is versioned by the moving `v1` major tag, while its internal `docker://` image reference is pinned to an immutable digest.
 
 ## Development
 
