@@ -1,5 +1,9 @@
 # Notes
 
+## TODO
+
+- Rework Docker action versioning so `@v1` always runs the newest published image without a separate digest-pinning PR after each release.
+
 Floating Tag Strategy is best for an Actions Repo like this. Basically:
 
 - You create & manage a `v1` branch on the Repo
