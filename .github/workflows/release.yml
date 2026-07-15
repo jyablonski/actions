@@ -38,10 +38,5 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
             ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
 
-      - name: Set container package visibility to public
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api --method PATCH "/user/packages/container/actions-go/visibility" -f visibility=public
-
       - name: Report immutable image reference
         run: echo "${IMAGE_NAME}@${{ steps.build.outputs.digest }}" >> "$GITHUB_STEP_SUMMARY"
