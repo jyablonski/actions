@@ -5,7 +5,7 @@ inputs:
     description: Slack incoming webhook URL.
     required: true
   template:
-    description: Notification template: pipeline-failure or deployment-success.
+    description: "Notification template: pipeline-failure or deployment-success."
     required: true
   failed-jobs:
     description: Comma-separated failed job names for pipeline-failure.
@@ -15,8 +15,8 @@ inputs:
     description: Deployment URL for deployment-success.
     required: false
     default: ""
-  mention:
-    description: Optional Slack user or channel mention.
+  slack-mention:
+    description: "Optional Slack user ID (for example, <@U01234567>) or user group ID (for example, <!subteam^S01234567>) to ping."
     required: false
     default: ""
   summary:
@@ -25,6 +25,7 @@ inputs:
     default: ""
 runs:
   using: docker
+  # TODO: Replace with the immutable digest emitted by the first GHCR image release.
   image: docker://ghcr.io/jyablonski/actions-go@sha256:<PLACEHOLDER_DIGEST>
   args:
     - --template
@@ -36,6 +37,6 @@ runs:
     - --deployment-url
     - ${{ inputs.deployment-url }}
     - --mention
-    - ${{ inputs.mention }}
+    - ${{ inputs.slack-mention }}
     - --summary
     - ${{ inputs.summary }}

@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# Keep the coverage policy in one place for Make, CI, and pre-commit; the temporary profile must be cleaned up on every exit path.
 minimum_coverage=90
 coverage_file="$(mktemp)"
 trap 'rm -f "$coverage_file"' EXIT

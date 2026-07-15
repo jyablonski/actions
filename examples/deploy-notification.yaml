@@ -1,6 +1,7 @@
 name: Deployment notifications
 
 on:
+  # TODO: Change this trigger to match the branch and event that start your deployment.
   push:
     branches: [main]
 
@@ -12,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # TODO: Replace with the checks that must pass before deployment.
       - run: make test
 
   deploy:
@@ -23,29 +25,19 @@ jobs:
       - uses: actions/checkout@v7
       - id: release
         run: |
-          # Replace this with your deployment command and set released=false when it makes no release.
+          # TODO: Replace with your deployment command and set released=false when it makes no release.
           make deploy
           echo "released=true" >> "$GITHUB_OUTPUT"
 
-  notify-failure:
+  notify:
     needs: [test, deploy]
-    if: ${{ always() && (needs.test.result == 'failure' || needs.deploy.result == 'failure') }}
+    # TODO: Remove the success clause to send notifications only when a job fails.
+    if: ${{ always() && (needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.deploy.outputs.released == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: jyablonski/actions/deploy-notification@v1
         with:
+          # TODO: Create this repository secret with the Slack incoming webhook URL.
           slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          template: pipeline-failure
-          failed-jobs: ${{ needs.test.result == 'failure' && 'test' || needs.deploy.result == 'failure' && 'deploy' || 'See workflow run' }}
-          mention: "<!here>"
-
-  notify-success:
-    needs: [test, deploy]
-    if: ${{ needs.test.result == 'success' && needs.deploy.result == 'success' && needs.deploy.outputs.released == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: jyablonski/actions/deploy-notification@v1
-        with:
-          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          template: deployment-success
-          deployment-url: https://example.com/deployments/${{ github.sha }}
+          template: ${{ (needs.test.result == 'failure' || needs.deploy.result == 'failure') && 'pipeline-failure' || 'deployment-success' }}
+          slack-mention: "<@U02NA9HHPCH>"

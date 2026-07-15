@@ -4,12 +4,13 @@ inputs:
   slack-webhook:
     description: Slack incoming webhook URL.
     required: true
-  mention:
-    description: Optional Slack user or channel mention.
+  slack-mention:
+    description: "Optional Slack user ID (for example, <@U01234567>) or user group ID (for example, <!subteam^S01234567>) to ping."
     required: false
     default: ""
 runs:
   using: docker
+  # TODO: Replace with the immutable digest emitted by the first GHCR image release.
   image: docker://ghcr.io/jyablonski/actions-go@sha256:<PLACEHOLDER_DIGEST>
   args:
     - --template
@@ -17,4 +18,4 @@ runs:
     - --slack-webhook
     - ${{ inputs.slack-webhook }}
     - --mention
-    - ${{ inputs.mention }}
+    - ${{ inputs.slack-mention }}

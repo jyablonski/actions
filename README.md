@@ -4,32 +4,29 @@ Reusable GitHub Actions maintained by `jyablonski`. Go-backed actions share one 
 
 ## Go-backed notification actions
 
-Use a moving major tag for the action template:
+| Action                                      | Notification template | Required inputs             | Optional inputs                           | Purpose                                    |
+| ------------------------------------------- | --------------------- | --------------------------- | ----------------------------------------- | ------------------------------------------ |
+| `jyablonski/actions/pr-notification@v1`     | `pr-opened`           | `slack-webhook`             | `slack-mention`                           | Posts a summary when a pull request opens. |
+| `jyablonski/actions/deploy-notification@v1` | `pipeline-failure`    | `slack-webhook`, `template` | `failed-jobs`, `slack-mention`, `summary` | Posts when a pipeline job fails.           |
+| `jyablonski/actions/deploy-notification@v1` | `deployment-success`  | `slack-webhook`, `template` | `deployment-url`, `slack-mention`         | Posts after a deployment is released.      |
+
+For example, use the pull request notification action in a pull request workflow:
 
 ```yaml
 - uses: jyablonski/actions/pr-notification@v1
   with:
     slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    slack-mention: "<@SLACK_USER_ID>"
 ```
 
-The action template is versioned by the moving `v1` major tag, while its internal `docker://` image reference is pinned to an immutable digest. After the first image release, repoint the clearly marked `<PLACEHOLDER_DIGEST>` values in the Go-backed action metadata to the digest emitted by the release workflow.
+Set `slack-mention` to an individual user ID such as `<@U01234567>` or a user-group ID such as `<!subteam^S01234567>`.
 
-### Pull request opened
-
-`pr-notification` posts a concise pull request summary. It reads pull request details from the standard GitHub event payload.
-
-See [examples/pr-notification.yaml](examples/pr-notification.yaml) for a complete workflow.
-
-### Post-merge pipeline
-
-`deploy-notification` accepts `template: pipeline-failure` or `template: deployment-success`. Run a final notification job with `if: always()` for failures. Send a deployment-success message only when the deploy job reports that it actually released a deployment.
-
-See [examples/deploy-notification.yaml](examples/deploy-notification.yaml) for failure and conditional deployment-success notifications.
+The action template is versioned by the moving `v1` major tag, while its internal `docker://` image reference is pinned to an immutable digest. After the first image release, replace the `<PLACEHOLDER_DIGEST>` values in the Go-backed action metadata with the digest emitted by the release workflow.
 
 ## Development
 
 ```sh
-make ci
+make test
 ```
 
 Run `make help` to list the available local build and validation commands.
