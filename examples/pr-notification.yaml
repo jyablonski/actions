@@ -1,0 +1,19 @@
+name: Pull request notification
+
+on:
+  # TODO: Adjust the pull request events that should notify your team.
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jyablonski/actions/pr-notification@v1
+        with:
+          # TODO: Create this repository secret with the Slack incoming webhook URL.
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack-mention: "<@U02NA9HHPCH>"
