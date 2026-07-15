@@ -25,9 +25,15 @@ type Block struct {
 	Fields []Text `json:"fields,omitempty"`
 }
 
-type Message struct {
-	Text   string  `json:"text"`
+type Attachment struct {
+	Color  string  `json:"color"`
 	Blocks []Block `json:"blocks"`
+}
+
+type Message struct {
+	Text        string       `json:"text"`
+	Blocks      []Block      `json:"blocks,omitempty"`
+	Attachments []Attachment `json:"attachments,omitempty"`
 }
 
 type Params struct {
@@ -102,7 +108,7 @@ func renderPipelineFailure(ctx githubctx.Context, params Params) Message {
 	if params.Summary != "" {
 		message.Blocks = append(message.Blocks, section(escape(params.Summary)))
 	}
-	return withRunLink(message, ctx, params.Mention)
+	return withColor(withRunLink(message, ctx, params.Mention), "danger")
 }
 
 func renderDeploymentSuccess(ctx githubctx.Context, params Params) Message {
@@ -121,7 +127,7 @@ func renderDeploymentSuccess(ctx githubctx.Context, params Params) Message {
 	if params.DeploymentURL != "" {
 		message.Blocks = append(message.Blocks, section(fmt.Sprintf("<%s|View deployment>", params.DeploymentURL)))
 	}
-	return withRunLink(message, ctx, params.Mention)
+	return withColor(withRunLink(message, ctx, params.Mention), "good")
 }
 
 func withRunLink(message Message, ctx githubctx.Context, mention string) Message {
@@ -131,6 +137,12 @@ func withRunLink(message Message, ctx githubctx.Context, mention string) Message
 	if ctx.RunURL != "" {
 		message.Blocks = append(message.Blocks, section(fmt.Sprintf("<%s|View workflow run>", ctx.RunURL)))
 	}
+	return message
+}
+
+func withColor(message Message, color string) Message {
+	message.Attachments = []Attachment{{Color: color, Blocks: message.Blocks}}
+	message.Blocks = nil
 	return message
 }
 

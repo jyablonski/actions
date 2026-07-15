@@ -10,7 +10,7 @@ inputs:
     default: ""
 runs:
   using: docker
-  image: docker://ghcr.io/jyablonski/actions-go@sha256:7d359833218bf7e62524d12fe80f792f4b30b8aa60674e79d95f1c4faf1238f1
+  image: docker://ghcr.io/jyablonski/actions-go:v1
   args:
     - --template
     - pr-opened

@@ -68,8 +68,12 @@ func TestRenderPipelineFailureIncludesFailedJobs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if !strings.Contains(message.Blocks[2].Fields[3].Text, "test, deploy") {
-		t.Fatalf("failed jobs field = %q", message.Blocks[2].Fields[3].Text)
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != "danger" {
+		t.Fatalf("attachments = %#v", message.Attachments)
+	}
+	blocks := message.Attachments[0].Blocks
+	if !strings.Contains(blocks[2].Fields[3].Text, "test, deploy") {
+		t.Fatalf("failed jobs field = %q", blocks[2].Fields[3].Text)
 	}
 }
 
@@ -84,13 +88,14 @@ func TestRenderPipelineFailureIncludesDefaultsAndSummary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if got := message.Blocks[2].Fields[3].Text; !strings.Contains(got, "See workflow run") {
+	blocks := message.Attachments[0].Blocks
+	if got := blocks[2].Fields[3].Text; !strings.Contains(got, "See workflow run") {
 		t.Fatalf("failed jobs field = %q", got)
 	}
-	if got := message.Blocks[3].Text.Text; got != "test &lt;failed&gt;" {
+	if got := blocks[3].Text.Text; got != "test &lt;failed&gt;" {
 		t.Fatalf("summary block = %q", got)
 	}
-	if got := message.Blocks[len(message.Blocks)-1].Text.Text; !strings.Contains(got, "View workflow run") {
+	if got := blocks[len(blocks)-1].Text.Text; !strings.Contains(got, "View workflow run") {
 		t.Fatalf("workflow link = %q", got)
 	}
 }
@@ -108,10 +113,14 @@ func TestRenderDeploymentSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
 	}
-	if got := message.Blocks[2].Fields[0].Text; !strings.Contains(got, "abcdef1") {
+	if len(message.Attachments) != 1 || message.Attachments[0].Color != "good" {
+		t.Fatalf("attachments = %#v", message.Attachments)
+	}
+	blocks := message.Attachments[0].Blocks
+	if got := blocks[2].Fields[0].Text; !strings.Contains(got, "abcdef1") {
 		t.Fatalf("version field = %q", got)
 	}
-	if got := message.Blocks[3].Text.Text; got != "<https://example.com/deployments/42|View deployment>" {
+	if got := blocks[3].Text.Text; got != "<https://example.com/deployments/42|View deployment>" {
 		t.Fatalf("deployment link = %q", got)
 	}
 }
