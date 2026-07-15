@@ -28,7 +28,7 @@ sync-v1:
 	echo "v1 branch updated to $$latest_tag"
 
 GO := go
-GOLANGCI_LINT_VERSION := v2.1.6
+GOLANGCI_LINT_VERSION := v2.12.2
 BUILD_DIR := bin
 
 .DEFAULT_GOAL := help
