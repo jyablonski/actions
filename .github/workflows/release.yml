@@ -40,3 +40,9 @@ jobs:
 
       - name: Report immutable image reference
         run: echo "${IMAGE_NAME}@${{ steps.build.outputs.digest }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Notify Slack
+        uses: ./deploy-notification
+        with:
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          template: deployment-success
