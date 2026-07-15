@@ -26,3 +26,41 @@ sync-v1:
 	git checkout main; \
 	git branch -D tmp-v1; \
 	echo "v1 branch updated to $$latest_tag"
+
+GO := go
+GOLANGCI_LINT_VERSION := v2.1.6
+BUILD_DIR := bin
+
+.DEFAULT_GOAL := help
+
+.PHONY: help build test vet deadcode lint ci pre-commit
+help:
+	@printf '%s\n' \
+		'build       Build notify to bin/notify.' \
+		'test        Run gotestsum and enforce 90% coverage.' \
+		'vet         Run go vet.' \
+		'deadcode    Check for unreachable Go code.' \
+		'lint        Run the pinned golangci-lint version.' \
+		'ci          Run the local equivalent of CI checks.' \
+		'pre-commit  Run all pre-commit hooks.'
+
+build:
+	mkdir -p $(BUILD_DIR)
+	$(GO) build -o $(BUILD_DIR)/notify ./cmd/notify
+
+test:
+	scripts/check-go-coverage.sh
+
+vet:
+	$(GO) vet ./...
+
+deadcode:
+	scripts/check-deadcode.sh
+
+lint:
+	$(GO) run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run
+
+ci: build vet test deadcode lint
+
+pre-commit:
+	pre-commit run --all-files

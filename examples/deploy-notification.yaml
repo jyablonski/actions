@@ -1,0 +1,51 @@
+name: Deployment notifications
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: make test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: release
+        run: |
+          # Replace this with your deployment command and set released=false when it makes no release.
+          make deploy
+          echo "released=true" >> "$GITHUB_OUTPUT"
+
+  notify-failure:
+    needs: [test, deploy]
+    if: ${{ always() && (needs.test.result == 'failure' || needs.deploy.result == 'failure') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jyablonski/actions/deploy-notification@v1
+        with:
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          template: pipeline-failure
+          failed-jobs: ${{ needs.test.result == 'failure' && 'test' || needs.deploy.result == 'failure' && 'deploy' || 'See workflow run' }}
+          mention: "<!here>"
+
+  notify-success:
+    needs: [test, deploy]
+    if: ${{ needs.test.result == 'success' && needs.deploy.result == 'success' && needs.deploy.outputs.released == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jyablonski/actions/deploy-notification@v1
+        with:
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          template: deployment-success
+          deployment-url: https://example.com/deployments/${{ github.sha }}

@@ -1,0 +1,41 @@
+name: Deploy Notification
+description: Send a Slack pipeline-failure or deployment-success notification.
+inputs:
+  slack-webhook:
+    description: Slack incoming webhook URL.
+    required: true
+  template:
+    description: Notification template: pipeline-failure or deployment-success.
+    required: true
+  failed-jobs:
+    description: Comma-separated failed job names for pipeline-failure.
+    required: false
+    default: ""
+  deployment-url:
+    description: Deployment URL for deployment-success.
+    required: false
+    default: ""
+  mention:
+    description: Optional Slack user or channel mention.
+    required: false
+    default: ""
+  summary:
+    description: Optional failure summary.
+    required: false
+    default: ""
+runs:
+  using: docker
+  image: docker://ghcr.io/jyablonski/actions-go@sha256:<PLACEHOLDER_DIGEST>
+  args:
+    - --template
+    - ${{ inputs.template }}
+    - --slack-webhook
+    - ${{ inputs.slack-webhook }}
+    - --failed-jobs
+    - ${{ inputs.failed-jobs }}
+    - --deployment-url
+    - ${{ inputs.deployment-url }}
+    - --mention
+    - ${{ inputs.mention }}
+    - --summary
+    - ${{ inputs.summary }}

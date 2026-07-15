@@ -1,0 +1,17 @@
+name: Pull request notification
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jyablonski/actions/pr-notification@v1
+        with:
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          mention: "<!here>"

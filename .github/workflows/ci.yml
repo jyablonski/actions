@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: "1.26.5"
+  GOTESTSUM_VERSION: "v1.13.0"
+  DEADCODE_VERSION: "v0.48.0"
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - run: go build -o /tmp/notify ./cmd/notify
+
+      - run: go vet ./...
+
+      - name: Test with coverage
+        run: |
+          GOBIN="${RUNNER_TEMP}/bin" go install "gotest.tools/gotestsum@${GOTESTSUM_VERSION}"
+          GOTESTSUM_BIN="${RUNNER_TEMP}/bin/gotestsum" scripts/check-go-coverage.sh
+
+      - name: Check dead code
+        run: |
+          GOBIN="${RUNNER_TEMP}/bin" go install "golang.org/x/tools/cmd/deadcode@${DEADCODE_VERSION}"
+          DEADCODE_BIN="${RUNNER_TEMP}/bin/deadcode" scripts/check-deadcode.sh
+      - uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
+        with:
+          version: v2.1.6

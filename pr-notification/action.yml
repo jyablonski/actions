@@ -1,0 +1,20 @@
+name: PR Notification
+description: Send a Slack notification when a pull request is opened.
+inputs:
+  slack-webhook:
+    description: Slack incoming webhook URL.
+    required: true
+  mention:
+    description: Optional Slack user or channel mention.
+    required: false
+    default: ""
+runs:
+  using: docker
+  image: docker://ghcr.io/jyablonski/actions-go@sha256:<PLACEHOLDER_DIGEST>
+  args:
+    - --template
+    - pr-opened
+    - --slack-webhook
+    - ${{ inputs.slack-webhook }}
+    - --mention
+    - ${{ inputs.mention }}
